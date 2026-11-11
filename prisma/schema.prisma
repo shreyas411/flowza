@@ -1,0 +1,511 @@
+// Prisma Schema for Instagram CRM SaaS (PostgreSQL + pgvector)
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+enum OrgType {
+  BUSINESS
+  AGENCY
+}
+
+enum OrgRole {
+  SUPER_ADMIN
+  OWNER
+  ADMIN
+  MANAGER
+  AGENT
+  VIEWER
+}
+
+enum MemberStatus {
+  ACTIVE
+  SUSPENDED
+  INVITED
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  FOLLOW_UP
+  CONVERTED
+  LOST
+}
+
+enum ConversationStatus {
+  OPEN
+  UNASSIGNED
+  ASSIGNED
+  RESOLVED
+}
+
+enum MessageSenderType {
+  CUSTOMER
+  AGENT
+  AI
+  SYSTEM
+}
+
+enum MessageStatus {
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum AIMode {
+  DISABLED
+  SUGGESTION
+  AUTOMATIC
+  HYBRID
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ---------------- IDENTITY ----------------
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  passwordHash        String
+  fullName            String
+  avatarUrl           String?
+  phone               String?
+  timezone            String               @default("UTC")
+  language            String               @default("en")
+  emailVerified       Boolean              @default(false)
+  isSuperAdmin        Boolean              @default(false)
+  status              MemberStatus         @default(ACTIVE)
+  failedLoginAttempts Int                  @default(0)
+  lockoutUntil        DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  memberships         OrganizationMember[]
+  assignments         ConversationAssignment[]
+  notes               ConversationNote[]
+  supportTickets      SupportTicket[]
+  auditLogs           AuditLog[]
+  sessions            Session[]
+
+  @@map("users")
+}
+
+model Organization {
+  id                    String               @id @default(uuid())
+  name                  String
+  slug                  String               @unique
+  type                  OrgType              @default(BUSINESS)
+  logoUrl               String?
+  description           String?
+  website               String?
+  industry              String?
+  businessEmail         String?
+  phone                 String?
+  address               String?
+  timezone              String               @default("UTC")
+  defaultLanguage       String               @default("en")
+  status                MemberStatus         @default(ACTIVE)
+  onboardingStep        Int                  @default(1)
+  isOnboardingCompleted Boolean              @default(false)
+  parentAgencyId        String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  members               OrganizationMember[]
+  invitations           Invitation[]
+  accounts              InstagramAccount[]
+  contacts              Contact[]
+  conversations         Conversation[]
+  teams                 Team[]
+  aiSettings            AISettings?
+  knowledgeDocs         KnowledgeDocument[]
+  automationRules       AutomationRule[]
+  notifications         Notification[]
+  supportTickets        SupportTicket[]
+  subscription          Subscription?
+  invoices              Invoice[]
+  usageRecords          UsageRecord[]
+  auditLogs             AuditLog[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String         @id @default(uuid())
+  organizationId String
+  userId         String
+  role           OrgRole        @default(AGENT)
+  status         MemberStatus   @default(ACTIVE)
+  lastActiveAt   DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@map("organization_members")
+}
+
+model Invitation {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String
+  role           OrgRole      @default(AGENT)
+  token          String       @unique
+  status         String       @default("PENDING") // PENDING, ACCEPTED, CANCELED, EXPIRED
+  expiresAt      DateTime
+  invitedById    String
+  invitedByName  String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("invitations")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ---------------- INSTAGRAM INTEGRATION ----------------
+
+model InstagramAccount {
+  id                  String                @id @default(uuid())
+  organizationId      String
+  instagramBusinessId String                @unique
+  username            String
+  name                String?
+  profilePictureUrl   String?
+  accountType         String                @default("BUSINESS")
+  isConnected         Boolean               @default(true)
+  lastSyncAt          DateTime?
+  tokenExpiresAt      DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  organization        Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conversations       Conversation[]
+
+  @@index([organizationId])
+  @@map("instagram_accounts")
+}
+
+// ---------------- INBOX & CRM ----------------
+
+model Contact {
+  id                 String         @id @default(uuid())
+  organizationId     String
+  platform           String         @default("INSTAGRAM")
+  platformUserId     String
+  username           String
+  displayName        String?
+  profilePictureUrl  String?
+  email              String?
+  phone              String?
+  leadStatus         LeadStatus     @default(NEW)
+  customFields       Json?          @default("{}")
+  createdAt          DateTime       @default(now())
+  lastInteractionAt  DateTime       @default(now())
+  organization       Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conversations      Conversation[]
+
+  @@unique([organizationId, platform, platformUserId])
+  @@index([organizationId, username])
+  @@map("contacts")
+}
+
+model Conversation {
+  id                      String               @id @default(uuid())
+  organizationId          String
+  instagramAccountId      String
+  contactId               String
+  platformThreadId        String               @unique
+  status                  ConversationStatus   @default(OPEN)
+  isAiHandled             Boolean              @default(false)
+  isAiPaused              Boolean              @default(false)
+  unreadCount             Int                  @default(0)
+  lastMessageSnippet      String?
+  lastMessageAt           DateTime             @default(now())
+  lastCustomerMessageAt   DateTime             @default(now())
+  humanAgentEligibleUntil DateTime?
+  assignedToId            String?
+  tags                    String[]
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+
+  organization            Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  instagramAccount        InstagramAccount     @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  contact                 Contact              @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  messages                Message[]
+
+  @@index([organizationId, status])
+  @@map("conversations")
+}
+
+model Message {
+  id                  String             @id @default(uuid())
+  conversationId      String
+  platformMessageId   String?            @unique
+  senderType          MessageSenderType
+  senderId            String?
+  senderName          String?
+  text                String
+  status              MessageStatus      @default(SENT)
+  isPrivateReply      Boolean            @default(false)
+  isInternalNote      Boolean            @default(false)
+  policyCheckPassed   Boolean            @default(true)
+  policyBlockedReason String?
+  createdAt           DateTime           @default(now())
+  conversation        Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model ConversationAssignment {
+  id             String       @id @default(uuid())
+  conversationId String
+  assignedToId   String
+  assignedAt     DateTime     @default(now())
+  assignedTo     User         @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_assignments")
+}
+
+model ConversationNote {
+  id             String       @id @default(uuid())
+  conversationId String
+  authorId       String
+  content        String
+  createdAt      DateTime     @default(now())
+  author         User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_notes")
+}
+
+// ---------------- TEAMS & PERMISSIONS ----------------
+
+model Team {
+  id             String        @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  memberIds      String[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("teams")
+}
+
+// ---------------- AI ASSISTANT & KNOWLEDGE BASE ----------------
+
+model AISettings {
+  id                        String       @id @default(uuid())
+  organizationId            String       @unique
+  isEnabled                 Boolean      @default(true)
+  mode                      AIMode       @default(HYBRID)
+  businessName              String       @default("Store Support")
+  industry                  String       @default("E-Commerce & Retail")
+  businessDescription       String       @default("Official direct customer support channel.")
+  tone                      String       @default("friendly, professional, and concise")
+  preferredLanguage         String       @default("en")
+  supportedLanguages        String[]     @default(["en", "es", "fr", "de"])
+  workingHours              String       @default("09:00 - 18:00 UTC")
+  businessLocation          String?      @default("Global / Online")
+  responseLength            String       @default("compact")
+  confidenceThreshold       Float        @default(0.75)
+  escalationConditions      String       @default("When customer asks for human or requests refund.")
+  humanHandoffInstructions  String       @default("Apologize politely and inform that a specialist is taking over.")
+  updatedAt                 DateTime     @updatedAt
+  organization              Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("ai_settings")
+}
+
+model KnowledgeDocument {
+  id             String           @id @default(uuid())
+  organizationId String
+  title          String
+  sourceType     String
+  content        String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("knowledge_documents")
+}
+
+// ---------------- AUTOMATION ----------------
+
+model AutomationRule {
+  id             String                @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  triggerType    String
+  conditions     Json?
+  actions        Json?
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("automation_rules")
+}
+
+// ---------------- NOTIFICATIONS ----------------
+
+model Notification {
+  id             String       @id @default(uuid())
+  organizationId String
+  recipientId    String?
+  title          String
+  message        String
+  type           String
+  isRead         Boolean      @default(false)
+  linkUrl        String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, isRead])
+  @@map("notifications")
+}
+
+// ---------------- SUPPORT TICKETS ----------------
+
+model SupportTicket {
+  id             String                @id @default(uuid())
+  organizationId String
+  userId         String
+  subject        String
+  category       String
+  priority       TicketPriority        @default(MEDIUM)
+  status         TicketStatus          @default(OPEN)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@map("support_tickets")
+}
+
+// ---------------- BILLING & USAGE ----------------
+
+model Plan {
+  id                      String         @id @default(uuid())
+  name                    String         @unique
+  displayName             String
+  maxAccounts             Int
+  maxSeats                Int
+  maxAiTokens             Int
+  maxMonthlyConversations Int
+  priceMonthly            Float
+  features                String[]
+  subscriptions           Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  organizationId     String             @unique
+  planId             String
+  status             SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime           @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  trialEndsAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan               Plan               @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String       @id @default(uuid())
+  organizationId String
+  invoiceNumber  String       @unique
+  amount         Float
+  currency       String       @default("USD")
+  status         String       @default("PAID")
+  date           DateTime     @default(now())
+  pdfUrl         String?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("invoices")
+}
+
+model UsageRecord {
+  id             String       @id @default(uuid())
+  organizationId String
+  metric         String
+  quantity       Int          @default(0)
+  recordedAt     DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, recordedAt])
+  @@map("usage_records")
+}
+
+// ---------------- AUDIT LOGS ----------------
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String?
+  userName       String?
+  action         String
+  targetType     String
+  targetId       String?
+  metadata       Json?        @default("{}")
+  ipAddress      String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("audit_logs")
+}

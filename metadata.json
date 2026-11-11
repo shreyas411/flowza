@@ -1,0 +1,6 @@
+{
+  "name": "InstaFlow CRM - Instagram Multi-Tenant CRM & AI Automation",
+  "description": "Production-grade, lightweight multi-tenant Instagram CRM SaaS with unified inbox, real-time messaging, AI automation, contact management, and team collaboration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

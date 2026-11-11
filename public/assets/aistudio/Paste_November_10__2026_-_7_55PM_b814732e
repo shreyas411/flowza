@@ -1,0 +1,1566 @@
+# MASTER PROMPT: BUILD A COMPLETE INSTAGRAM CRM SAAS APPLICATION
+
+## 1. YOUR ROLE
+
+Act as a senior SaaS architect, senior full-stack developer, database architect, UI/UX designer, DevOps engineer and AI integration specialist.
+
+Build a complete, production-oriented, lightweight, multi-tenant Instagram CRM SaaS application.
+
+Do not just generate a landing page, dashboard mockup, frontend prototype or static UI.
+
+Build a functioning end-to-end application with:
+- Frontend.
+- Backend APIs.
+- Database.
+- Authentication.
+- Multi-tenancy.
+- Instagram OAuth.
+- Instagram API integration.
+- Webhook processing.
+- Real-time messaging.
+- AI automation.
+- CRM.
+- Team management.
+- Subscription management.
+- Usage tracking.
+- Security.
+- Testing.
+- Deployment documentation.
+
+Implement the application incrementally and verify that each module works.
+
+Do not leave core features as TODOs or fake implementations.
+
+When external credentials are unavailable, implement the integration properly using environment variables, provide a clearly labeled development simulator for testing, and document exactly what credentials and Meta approvals are needed.
+
+---
+
+# 2. PRODUCT OVERVIEW
+
+Product: Instagram CRM SaaS.
+
+Product category: Customer communication and relationship management.
+
+Primary users:
+1. Individual businesses.
+2. Marketing agencies.
+3. Agency employees and customer support agents.
+4. Platform administrators.
+
+Main objective:
+
+Allow businesses and agencies to connect their Instagram professional accounts, manage customer conversations through a unified inbox, use AI to respond to customers, assign conversations to agents, manage leads and maintain customer histories.
+
+Core modules:
+
+1. Authentication.
+2. Organization and workspace management.
+3. Instagram account integration.
+4. Unified Instagram inbox.
+5. Real-time messaging.
+6. AI chatbot.
+7. AI knowledge base.
+8. Customer CRM.
+9. Team and agent management.
+10. Conversation assignment.
+11. Tags and internal notes.
+12. Automation rules.
+13. Notifications.
+14. Analytics.
+15. Subscription and billing.
+16. Usage tracking.
+17. Platform administration.
+18. Audit logs.
+
+The application must be multi-tenant from the beginning.
+
+---
+
+# 3. TECHNOLOGY STACK
+
+Use the following stack.
+
+## Frontend
+
+- Next.js with App Router.
+- React.
+- TypeScript.
+- Tailwind CSS.
+- shadcn/ui.
+- Radix UI through shadcn components.
+- Lucide React icons.
+- TanStack Query for server state.
+- React Hook Form.
+- Zod for validation.
+- Zustand only where shared client state is necessary.
+- Socket.IO Client for realtime updates.
+- TanStack Table for data-heavy tables.
+
+## Backend
+
+- NestJS.
+- TypeScript.
+- REST API.
+- Prisma ORM.
+- PostgreSQL.
+- Redis.
+- BullMQ for background processing.
+- Socket.IO for realtime communication.
+- OpenAI API for AI functionality.
+- pgvector for semantic knowledge retrieval.
+
+## Infrastructure
+
+- Docker.
+- Docker Compose for local development.
+- PostgreSQL.
+- Redis.
+- S3-compatible file storage.
+- AWS deployment compatibility.
+- Sentry-compatible error tracking.
+- Structured application logging.
+
+Use a modular monolith architecture.
+
+Do not create unnecessary microservices.
+
+Keep frontend and backend separately deployable.
+
+Use a monorepo if appropriate, with clear workspace boundaries.
+
+Recommended structure:
+
+instagram-crm/
+- apps/
+  - web/
+  - api/
+- packages/
+  - shared/
+  - types/
+  - config/
+- infrastructure/
+- docs/
+
+---
+
+# 4. UI/UX DESIGN SYSTEM – VERY IMPORTANT
+
+The UI must be professional, modern, lightweight and minimal.
+
+The entire application must use a LIGHT THEME ONLY.
+
+Do not implement dark mode.
+
+## Design direction
+
+Take inspiration from:
+- Linear.
+- Intercom.
+- Crisp.
+- Attio.
+- Modern lightweight CRM dashboards.
+
+Do not copy their interfaces.
+
+Create an original, clean SaaS interface.
+
+## Typography
+
+The application must use compact typography.
+
+Avoid oversized fonts.
+
+Use:
+- Font family: Inter.
+- Body font: 13px–14px.
+- Secondary text: 11px–12px.
+- Table text: 12px–13px.
+- Form labels: 12px.
+- Button text: 12px–13px.
+- Section headings: 15px–17px.
+- Page headings: 18px–20px.
+- Modal titles: 15px–17px.
+
+Avoid large hero headings inside the application dashboard.
+
+Do not use 28px, 32px or larger headings for normal dashboard screens.
+
+Use consistent font weights:
+- Regular: 400.
+- Medium: 500.
+- Semibold: 600.
+
+## Colors
+
+Use a neutral light color palette.
+
+Application background: #F8FAFC
+
+Sidebar background: #FFFFFF
+
+Card background: #FFFFFF
+
+Primary text: #1E293B
+
+Secondary text: #64748B
+
+Border: #E2E8F0
+
+Primary accent: #4F46E5
+
+Success: #16A34A
+
+Warning: #D97706
+
+Danger: #DC2626
+
+Muted background: #F1F5F9
+
+Instagram accent colors may be used sparingly for Instagram account indicators.
+
+Do not use excessive gradients, colorful cards, glowing effects, glassmorphism or unnecessary shadows.
+
+## Component library
+
+Use shadcn/ui for:
+- Buttons.
+- Dropdowns.
+- Dialogs.
+- Popovers.
+- Tooltips.
+- Tabs.
+- Forms.
+- Inputs.
+- Selects.
+- Checkboxes.
+- Switches.
+- Tables.
+- Sheet panels.
+- Toasts.
+- Command menus.
+- Skeleton loaders.
+- Pagination.
+
+Use Lucide icons.
+
+Use icon-only buttons where appropriate, with tooltips.
+
+Avoid unnecessary UI dependencies.
+
+Do not install multiple libraries that solve the same problem.
+
+## Layout
+
+Desktop:
+- Compact fixed-width sidebar.
+- Flexible main content.
+- Consistent spacing.
+- Maximum content density without clutter.
+
+Mobile:
+- Responsive navigation.
+- Collapsible sidebar.
+- Inbox adapts to single-column navigation.
+- Conversation details open in sheets.
+
+Spacing:
+- Use 4px and 8px spacing increments.
+- Compact cards.
+- Avoid excessive padding.
+- Avoid oversized empty spaces.
+
+Tables must be compact and readable.
+
+Use skeleton loading instead of layout jumps.
+
+Add proper empty states, loading states, error states and success feedback.
+
+The interface should feel fast and lightweight.
+
+---
+
+# 5. APPLICATION LAYOUT
+
+Create an authenticated application shell.
+
+Sidebar navigation:
+
+- Overview.
+- Inbox.
+- Contacts.
+- Instagram Accounts.
+- AI Assistant.
+- Knowledge Base.
+- Automations.
+- Teams.
+- Analytics.
+- Settings.
+
+Bottom sidebar:
+- Subscription plan.
+- Usage indicator.
+- Help.
+- User profile.
+
+Top navigation:
+- Current workspace selector.
+- Current Instagram account filter.
+- Search.
+- Notifications.
+- User menu.
+
+Create a workspace switcher for users belonging to multiple organizations.
+
+For agencies, create a client/account switcher.
+
+Keep navigation compact.
+
+---
+
+# 6. AUTHENTICATION AND ORGANIZATION MANAGEMENT
+
+Implement:
+
+- Email and password authentication.
+- Secure password hashing.
+- Forgot password.
+- Password reset.
+- Email verification.
+- Session management.
+- Logout.
+- Optional Google authentication architecture.
+- Protected routes.
+
+Organization management:
+
+A user can belong to multiple organizations.
+
+Organization types:
+- BUSINESS.
+- AGENCY.
+
+Organization roles:
+- OWNER.
+- ADMIN.
+- AGENT.
+- VIEWER.
+
+Create:
+- Organization creation.
+- Organization switching.
+- Member invitations.
+- Invitation acceptance.
+- Member removal.
+- Role changes.
+- Workspace settings.
+
+An agency can manage multiple Instagram client accounts.
+
+Add account-level access controls.
+
+An agency employee must only see the Instagram accounts they are authorized to access.
+
+Never assume that organization membership automatically grants access to every connected Instagram account.
+
+---
+
+# 7. INSTAGRAM API INTEGRATION
+
+Use ONLY Meta's official Instagram Platform APIs.
+
+Official documentation:
+
+https://developers.facebook.com/documentation/instagram-platform
+
+Use Instagram API with Instagram Login as the initial integration.
+
+Support Instagram professional Business and Creator accounts.
+
+Do not support personal Instagram accounts through unofficial workarounds.
+
+Do not use:
+- Instagram password collection.
+- Browser automation.
+- Selenium login automation.
+- Cookie extraction.
+- Unofficial private APIs.
+- Instagram scraping.
+- Unauthorized follower messaging.
+
+## Required permissions
+
+Use the currently documented Instagram Login permissions:
+
+- instagram_business_basic
+- instagram_business_manage_messages
+- instagram_business_manage_comments
+- instagram_business_content_publish
+
+Only request permissions actually needed by enabled features.
+
+## Instagram OAuth
+
+Implement:
+
+- OAuth initiation.
+- Secure state generation.
+- State verification.
+- Callback handling.
+- Authorization code exchange.
+- Token storage.
+- Token expiration tracking.
+- Token refresh only through supported Meta mechanisms.
+- Permission inspection.
+- Account disconnection.
+- Reauthorization.
+- Connection status.
+
+Use environment variables:
+
+INSTAGRAM_APP_ID=
+INSTAGRAM_APP_SECRET=
+INSTAGRAM_REDIRECT_URI=
+INSTAGRAM_WEBHOOK_VERIFY_TOKEN=
+META_GRAPH_API_VERSION=
+
+Never expose app secrets or access tokens to frontend code.
+
+Encrypt stored Instagram access tokens using envelope encryption or a KMS-backed encryption mechanism.
+
+Do not assume all tokens are indefinitely renewable.
+
+Implement expiration monitoring and reconnect notifications.
+
+## Instagram account connection
+
+Display:
+
+- Username.
+- Profile image.
+- Account type.
+- Account ID.
+- Connection status.
+- Granted permissions.
+- Last successful synchronization.
+- Token expiration information where available.
+
+Support multiple Instagram accounts per organization.
+
+## API service
+
+Create an Instagram provider service with methods:
+
+- getProfile()
+- getConversations()
+- getConversation()
+- getMessages()
+- sendTextMessage()
+- sendAttachment()
+- subscribeWebhooks()
+- getAccountPermissions()
+- disconnectAccount()
+
+Use the correct currently supported API paths and request parameters.
+
+Pin the API version in configuration.
+
+Do not scatter Graph API calls throughout controllers and services.
+
+Keep all API integration inside the Instagram provider layer.
+
+Implement timeout handling, retry policies, rate-limit handling and error normalization.
+
+---
+
+# 8. WEBHOOK IMPLEMENTATION
+
+Create:
+
+POST /webhooks/instagram
+
+GET /webhooks/instagram
+
+Implement:
+- Webhook subscription verification.
+- Webhook signature validation.
+- Raw body handling.
+- Incoming message event parsing.
+- Message reaction events where supported.
+- Read/delivery events where supported.
+- Comment events when enabled.
+- Event normalization.
+- Event persistence.
+- Duplicate event prevention.
+
+Webhook processing must be asynchronous.
+
+The endpoint must validate the request, durably accept or enqueue the event, and return quickly.
+
+Do not execute lengthy AI operations in the webhook request.
+
+Create a webhook_events table with:
+
+- id.
+- organization_id.
+- instagram_account_id.
+- event_type.
+- external_event_id or stable deduplication key.
+- payload.
+- processing_status.
+- retry_count.
+- received_at.
+- processed_at.
+- error_message.
+
+Implement:
+- BullMQ queues.
+- Exponential retries.
+- Dead-letter handling.
+- Failed event monitoring.
+- Idempotent processing.
+
+Do not trust organization IDs from incoming webhook payloads.
+
+Resolve account ownership using the connected Instagram account ID stored in your database.
+
+Verify webhook signatures using the raw request body and Meta's documented signature method.
+
+---
+
+# 9. UNIFIED INSTAGRAM INBOX
+
+This is the main application module.
+
+Build a functional three-column inbox.
+
+## Left sidebar
+
+Conversation filters:
+
+- All.
+- Unread.
+- Assigned to me.
+- Unassigned.
+- AI handled.
+- Human handled.
+- Resolved.
+
+Add filters for:
+- Instagram account.
+- Agent.
+- Team.
+- Date.
+- Contact tags.
+- Conversation status.
+
+## Conversation list
+
+Display:
+- Customer profile picture.
+- Username.
+- Last message preview.
+- Last message time.
+- Unread indicator.
+- Assigned agent.
+- AI indicator.
+- Account indicator.
+
+Sort by most recent activity.
+
+Use cursor-based pagination for large conversation histories.
+
+## Main conversation panel
+
+Support:
+- Incoming messages.
+- Outgoing messages.
+- Text.
+- Image attachments.
+- Supported video and audio messages.
+- Message timestamps.
+- Sender labels.
+- Delivery status where available.
+- Reply composer.
+- Attachment upload.
+- Send button.
+- Emoji picker if needed.
+
+Do not render unsupported message types incorrectly.
+
+Normalize unknown message types and provide a safe fallback.
+
+## Right customer sidebar
+
+Display:
+- Instagram username.
+- Profile picture.
+- Available customer information.
+- Conversation history.
+- Tags.
+- Notes.
+- Assigned agent.
+- Lead status.
+- Custom CRM fields.
+
+## Conversation actions
+
+- Assign agent.
+- Reassign agent.
+- Assign team.
+- Mark unread.
+- Resolve conversation.
+- Reopen conversation.
+- Add internal note.
+- Add tags.
+- Pause AI.
+- Resume AI.
+
+Internal notes must never be sent to Instagram.
+
+## Realtime
+
+Use Socket.IO.
+
+Events:
+- message:new.
+- message:updated.
+- conversation:updated.
+- conversation:assigned.
+- conversation:resolved.
+- contact:updated.
+- ai:response.
+- ai:handoff.
+- account:connection.updated.
+
+Authenticate socket connections.
+
+Authorize each socket subscription against organization and account membership.
+
+Never broadcast one tenant's events to another tenant.
+
+---
+
+# 10. MESSAGE SERVICE AND POLICY ENGINE
+
+Build a centralized outbound message service.
+
+Every outbound message must pass through this service.
+
+Before sending:
+
+1. Authenticate the user or internal automation.
+2. Resolve the organization.
+3. Validate account access.
+4. Verify the Instagram account is connected.
+5. Check required permission.
+6. Verify the recipient and conversation.
+7. Check messaging eligibility.
+8. Check AI or human sender permissions.
+9. Check rate limits.
+10. Check subscription usage limits.
+11. Send through Meta API.
+12. Persist the result.
+13. Publish the realtime event.
+
+Implement outbound message states:
+
+- PENDING.
+- SENDING.
+- SENT.
+- DELIVERED.
+- READ.
+- FAILED.
+
+Do not mark a message SENT before Meta confirms successful acceptance.
+
+Use idempotency keys for outbound jobs.
+
+Handle temporary API failures and prevent duplicate sends.
+
+## Messaging eligibility
+
+Implement Meta's documented messaging rules.
+
+The standard Instagram messaging window generally permits replies within 24 hours of the customer's last interaction.
+
+A private reply to a qualifying comment has separate eligibility and timing restrictions.
+
+The Human Agent exception may allow qualifying human responses within seven days, but it must not be used for AI automation or promotional messaging.
+
+Implement separate eligibility checks for:
+
+- Standard customer support replies.
+- Private comment replies.
+- Human Agent exception.
+- Other supported message types.
+
+Never treat a seven-day Human Agent exception as an AI messaging window.
+
+Never send automated messages outside the applicable permitted window.
+
+When a message is blocked by policy, show a clear reason in the UI.
+
+---
+
+# 11. AI ASSISTANT MODULE
+
+Build an AI-powered conversation engine using OpenAI API.
+
+Environment variables:
+
+OPENAI_API_KEY=
+OPENAI_MODEL=
+
+Keep model configuration changeable.
+
+Do not hardcode a model name throughout the application.
+
+## AI modes
+
+1. Disabled.
+2. Suggestion mode.
+3. Automatic response mode.
+4. Hybrid mode.
+
+Suggestion mode:
+- Generate a response draft.
+- Display it to the agent.
+- Agent can edit and send.
+- AI must not send automatically.
+
+Automatic mode:
+- Generate a response.
+- Apply business rules.
+- Check policy eligibility.
+- Send automatically when authorized.
+
+Hybrid mode:
+- Automatically handle supported simple enquiries.
+- Escalate complex enquiries.
+- Pause AI after handoff.
+
+## AI settings per account
+
+- Enable or disable AI.
+- AI mode.
+- Business name.
+- Industry.
+- Description.
+- Tone.
+- Preferred language.
+- Supported languages.
+- Working hours.
+- Business location.
+- FAQs.
+- Response length.
+- Confidence threshold.
+- Escalation conditions.
+- Human handoff instructions.
+
+## Intent detection
+
+Identify:
+- Greeting.
+- Product enquiry.
+- Price enquiry.
+- Availability.
+- Order enquiry.
+- Location enquiry.
+- Complaint.
+- Refund request.
+- Human support request.
+- Spam.
+- Other.
+
+## Knowledge base
+
+Allow business owners to add:
+
+- FAQs.
+- Plain text.
+- PDF documents.
+- Product information.
+- Pricing information.
+- Return policies.
+- Website content where authorized.
+
+Implement document processing:
+
+1. Upload.
+2. Validate file.
+3. Extract text.
+4. Split into chunks.
+5. Generate embeddings.
+6. Store embeddings in pgvector.
+7. Retrieve relevant chunks.
+8. Generate grounded responses.
+
+Use organization-scoped retrieval.
+
+Never retrieve knowledge from another tenant.
+
+Display source references for AI suggestions where possible.
+
+## AI safety
+
+- Do not invent prices.
+- Do not invent inventory.
+- Do not promise refunds.
+- Do not create unauthorized commitments.
+- Escalate uncertain answers.
+- Respect business instructions.
+- Respect messaging policy.
+- Respect human takeover.
+- Prevent AI prompt injection from customer messages.
+- Treat customer-provided documents and messages as untrusted input.
+- Keep system instructions separate from retrieved content.
+
+## Human handoff
+
+When a customer requests a human agent:
+
+- Stop AI automation for that conversation.
+- Change the conversation to human-handled.
+- Assign to an appropriate agent or team.
+- Notify the agent.
+- Record the handoff.
+- Resume AI only after an authorized human action.
+
+Create an AI execution log containing:
+- Input reference.
+- Model.
+- Token usage.
+- Retrieved knowledge references.
+- Response.
+- Status.
+- Error.
+- Execution time.
+- Cost estimate.
+
+Do not expose internal AI reasoning or hidden chain-of-thought to customers.
+
+---
+
+# 12. CUSTOMER CRM
+
+Create a Contacts module.
+
+Contact fields:
+
+- ID.
+- Organization ID.
+- Platform.
+- Platform user ID.
+- Instagram username.
+- Display name when available.
+- Profile picture.
+- Email if voluntarily supplied.
+- Phone if voluntarily supplied.
+- Lead status.
+- Custom fields.
+- Created date.
+- Last interaction.
+
+Contact features:
+
+- Search.
+- Pagination.
+- Contact profile.
+- Conversation history.
+- Tags.
+- Notes.
+- Custom fields.
+- Lead status.
+- Assigned owner.
+- Activity timeline.
+
+Lead statuses:
+
+- NEW.
+- QUALIFIED.
+- FOLLOW_UP.
+- CONVERTED.
+- LOST.
+
+Never assume the API provides customer email or phone numbers.
+
+Do not scrape follower information.
+
+Only store customer information obtained through permitted API access or voluntarily supplied information.
+
+---
+
+# 13. TEAM MANAGEMENT
+
+Implement:
+
+- Invite agents.
+- Remove agents.
+- Assign roles.
+- Create teams.
+- Assign conversations.
+- Reassign conversations.
+- View agent workload.
+- Track agent activity.
+- Track conversation resolution.
+
+Roles:
+
+OWNER:
+Full organization control.
+
+ADMIN:
+Manage organization and integrations.
+
+AGENT:
+Manage assigned conversations.
+
+VIEWER:
+Read-only access.
+
+Add account-level access restrictions for agencies.
+
+Track assignment history.
+
+---
+
+# 14. AUTOMATION MODULE
+
+Build a lightweight automation system.
+
+Initial triggers:
+
+- Incoming message.
+- Keyword detected.
+- Conversation created.
+- Customer requests human.
+- New qualifying comment, if comment integration is enabled.
+
+Initial actions:
+
+- Enable AI.
+- Disable AI.
+- Send permitted reply.
+- Assign agent.
+- Add tag.
+- Change lead status.
+- Create internal notification.
+- Escalate to human.
+
+Support:
+- Trigger.
+- Conditions.
+- Actions.
+- Active/inactive status.
+- Execution history.
+- Failure reason.
+
+Do not build an unnecessarily complex visual workflow engine in the first version.
+
+Use a structured automation rule engine.
+
+Every automation must go through the centralized policy-controlled messaging service.
+
+---
+
+# 15. NOTIFICATIONS
+
+Implement:
+- New conversation.
+- New message.
+- Assignment.
+- Mention.
+- Human handoff.
+- Failed message.
+- Instagram connection issue.
+- Token expiration warning.
+
+Support in-app notifications first.
+
+Keep email notification architecture extensible.
+
+Allow users to control notification preferences.
+
+---
+
+# 16. ANALYTICS
+
+Create a lightweight analytics dashboard.
+
+Metrics:
+- Total conversations.
+- Open conversations.
+- Unread conversations.
+- Conversations handled by AI.
+- Conversations handled by agents.
+- Average response time.
+- Resolution time.
+- Human handoffs.
+- New contacts.
+- Qualified leads.
+
+Allow filters:
+- Date range.
+- Instagram account.
+- Team.
+- Agent.
+
+Do not claim that AI directly caused a sale unless actual conversion data supports that conclusion.
+
+Use lightweight charts.
+
+Avoid expensive real-time aggregation for every dashboard request.
+
+Use cached or pre-aggregated metrics where appropriate.
+
+---
+
+# 17. BILLING AND SUBSCRIPTIONS
+
+Build subscription-ready architecture.
+
+Suggested plans:
+
+STARTER:
+- 1 Instagram account.
+- 2 team members.
+- Limited AI usage.
+- Basic inbox.
+
+GROWTH:
+- 3 Instagram accounts.
+- 5 team members.
+- More AI usage.
+- CRM features.
+
+PRO:
+- 10 Instagram accounts.
+- 15 team members.
+- Advanced AI.
+- Analytics.
+
+AGENCY:
+- Configurable account limits.
+- Configurable team limits.
+- Multiple client workspaces.
+- Advanced usage reporting.
+
+These limits must be database-configurable.
+
+Do not hardcode plan limits in frontend code.
+
+Implement:
+- Subscription.
+- Plan.
+- Usage records.
+- Account limits.
+- Team seat limits.
+- AI token limits.
+- Billing history.
+- Upgrade/downgrade structure.
+- Subscription status.
+
+Keep billing provider integration modular.
+
+Do not assume a subscription is paid simply because the frontend reports success.
+
+---
+
+# 18. DATABASE DESIGN
+
+Use PostgreSQL and Prisma.
+
+Create migrations for the following entities:
+
+Identity:
+- User.
+- Organization.
+- OrganizationMember.
+- Invitation.
+- Session.
+
+Instagram:
+- InstagramAccount.
+- InstagramToken.
+- InstagramPermission.
+- WebhookEvent.
+
+Inbox:
+- Contact.
+- Conversation.
+- Message.
+- MessageAttachment.
+- ConversationAssignment.
+- ConversationNote.
+- ConversationTag.
+- ContactTag.
+
+Teams:
+- Team.
+- TeamMember.
+- AccountAccess.
+
+AI:
+- AIAgent.
+- AISettings.
+- KnowledgeDocument.
+- KnowledgeChunk.
+- AIExecution.
+- AIHandoff.
+
+Automation:
+- AutomationRule.
+- AutomationExecution.
+
+Notifications:
+- Notification.
+- NotificationPreference.
+
+Billing:
+- Plan.
+- Subscription.
+- UsageRecord.
+- Invoice.
+
+Administration:
+- AuditLog.
+- ApplicationSetting.
+
+Use UUID primary keys.
+
+Add organization_id to all tenant-owned records.
+
+Create appropriate foreign keys, composite constraints, indexes and unique constraints.
+
+Important uniqueness constraints:
+
+- Organization ID + User ID.
+- Organization ID + Platform + Platform User ID.
+- Instagram account ID + Platform Message ID.
+- Instagram account ID + Platform Conversation ID.
+- Organization ID + slug.
+
+Use JSONB only for flexible metadata and custom fields, not as a substitute for relational modeling.
+
+Use timestamps consistently.
+
+Store external API identifiers as strings.
+
+Use UTC for stored timestamps and convert to local time in the frontend.
+
+## Tenant isolation
+
+Implement PostgreSQL RLS.
+
+Tenant context must be set within each transaction.
+
+Do not rely only on frontend filters.
+
+Test cross-tenant access attempts.
+
+Prevent cross-tenant foreign-key relationships.
+
+Use least-privilege database access.
+
+---
+
+# 19. API ENDPOINTS
+
+Create versioned REST endpoints.
+
+Authentication:
+
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/logout
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/reset-password
+
+Organizations:
+
+GET /api/v1/organizations
+POST /api/v1/organizations
+GET /api/v1/organizations/:id
+PATCH /api/v1/organizations/:id
+
+Members:
+
+GET /api/v1/members
+POST /api/v1/members/invite
+PATCH /api/v1/members/:id
+DELETE /api/v1/members/:id
+
+Instagram:
+
+GET /api/v1/integrations/instagram/connect
+GET /api/v1/integrations/instagram/callback
+GET /api/v1/instagram-accounts
+DELETE /api/v1/instagram-accounts/:id
+GET /api/v1/instagram-accounts/:id/status
+
+Webhooks:
+
+GET /webhooks/instagram
+POST /webhooks/instagram
+
+Inbox:
+
+GET /api/v1/conversations
+GET /api/v1/conversations/:id
+PATCH /api/v1/conversations/:id
+POST /api/v1/conversations/:id/assign
+POST /api/v1/conversations/:id/resolve
+POST /api/v1/conversations/:id/reopen
+POST /api/v1/conversations/:id/notes
+
+Messages:
+
+GET /api/v1/conversations/:id/messages
+POST /api/v1/conversations/:id/messages
+POST /api/v1/messages/:id/retry
+
+Contacts:
+
+GET /api/v1/contacts
+GET /api/v1/contacts/:id
+PATCH /api/v1/contacts/:id
+POST /api/v1/contacts/:id/tags
+
+AI:
+
+GET /api/v1/ai/settings
+PATCH /api/v1/ai/settings
+POST /api/v1/ai/suggest
+POST /api/v1/ai/enable
+POST /api/v1/ai/disable
+POST /api/v1/ai/handoff
+
+Knowledge base:
+
+GET /api/v1/knowledge
+POST /api/v1/knowledge
+DELETE /api/v1/knowledge/:id
+
+Teams:
+
+GET /api/v1/teams
+POST /api/v1/teams
+PATCH /api/v1/teams/:id
+POST /api/v1/teams/:id/members
+
+Automations:
+
+GET /api/v1/automations
+POST /api/v1/automations
+PATCH /api/v1/automations/:id
+POST /api/v1/automations/:id/toggle
+
+Analytics:
+
+GET /api/v1/analytics/overview
+GET /api/v1/analytics/conversations
+GET /api/v1/analytics/agents
+
+Billing:
+
+GET /api/v1/billing/subscription
+GET /api/v1/billing/usage
+POST /api/v1/billing/checkout
+
+Use DTO validation and consistent API response formats.
+
+Generate Swagger/OpenAPI documentation.
+
+Add pagination and filters.
+
+---
+
+# 20. SECURITY AND COMPLIANCE
+
+Implement:
+
+- Secure authentication.
+- Password hashing with Argon2id or equivalent.
+- CSRF protection where applicable.
+- Secure cookies.
+- CORS allowlist.
+- Rate limiting.
+- Input validation.
+- SQL injection protection through parameterized ORM queries.
+- XSS protection.
+- OAuth state validation.
+- Webhook signature verification.
+- Encrypted token storage.
+- Organization-based RBAC.
+- PostgreSQL RLS.
+- Audit logging.
+- Data deletion workflows.
+- Privacy policy page.
+- Account disconnection.
+- Secure file uploads.
+- File type and size validation.
+
+Never log:
+- Instagram access tokens.
+- App secrets.
+- Passwords.
+- Unnecessary sensitive customer content.
+
+Implement data retention policies.
+
+Provide customer data export and deletion workflows where required.
+
+Follow applicable privacy laws and Meta Platform Terms.
+
+---
+
+# 21. PERFORMANCE REQUIREMENTS
+
+The application must be lightweight.
+
+Avoid unnecessary packages.
+
+Optimize:
+- Bundle size.
+- Database queries.
+- Realtime event delivery.
+- Inbox pagination.
+- API response size.
+- AI token usage.
+- Image loading.
+- Background processing.
+
+Use:
+- Server Components where suitable.
+- Dynamic imports for heavy components.
+- Lazy loading.
+- Pagination.
+- Database indexes.
+- Redis caching where appropriate.
+- Background queues.
+- Debounced search.
+- Optimistic UI only when rollback is implemented.
+
+Do not load all conversations or messages into the browser.
+
+Do not run AI generation synchronously in the primary webhook request.
+
+Do not create unnecessary polling loops when realtime events are available.
+
+---
+
+# 22. ERROR HANDLING AND OBSERVABILITY
+
+Create centralized error handling.
+
+Track:
+- Instagram API errors.
+- Token expiration.
+- Webhook failures.
+- Queue failures.
+- AI errors.
+- Message sending errors.
+- Authentication errors.
+- Billing errors.
+
+Implement:
+- Structured logs.
+- Request correlation IDs.
+- Error tracking.
+- Health endpoints.
+- Worker health checks.
+- Queue monitoring.
+- Database connection monitoring.
+
+Create:
+
+GET /health
+GET /ready
+
+The health endpoint must not expose secrets or sensitive infrastructure details.
+
+Display actionable errors in the dashboard.
+
+---
+
+# 23. TESTING
+
+Create automated tests.
+
+Unit tests:
+- Authentication.
+- Tenant resolution.
+- Permission checks.
+- Messaging eligibility.
+- AI response policy.
+- Webhook parsing.
+- Idempotency.
+- Usage calculations.
+
+Integration tests:
+- Instagram OAuth callback.
+- Webhook processing.
+- Incoming message persistence.
+- Outgoing message processing.
+- AI response execution.
+- Agent assignment.
+- Tenant isolation.
+
+End-to-end tests:
+- User registration.
+- Organization creation.
+- Instagram connection using a test integration.
+- Incoming message.
+- Agent response.
+- AI suggestion.
+- Human handoff.
+- Contact creation.
+
+Create mock Meta API responses for development and testing.
+
+Clearly separate simulated data from real Instagram data.
+
+Never silently present simulated messages as real messages.
+
+---
+
+# 24. DEVELOPMENT ENVIRONMENT
+
+Create:
+
+- .env.example.
+- Dockerfile.
+- docker-compose.yml.
+- Prisma schema.
+- Initial migrations.
+- Seed script.
+- README.md.
+- API documentation.
+- Meta setup documentation.
+
+Environment variables:
+
+DATABASE_URL=
+REDIS_URL=
+JWT_SECRET=
+ENCRYPTION_KEY=
+INSTAGRAM_APP_ID=
+INSTAGRAM_APP_SECRET=
+INSTAGRAM_REDIRECT_URI=
+INSTAGRAM_WEBHOOK_VERIFY_TOKEN=
+META_GRAPH_API_VERSION=
+OPENAI_API_KEY=
+OPENAI_MODEL=
+S3_ENDPOINT=
+S3_BUCKET=
+S3_ACCESS_KEY=
+S3_SECRET_KEY=
+FRONTEND_URL=
+BACKEND_URL=
+
+Never commit actual secrets.
+
+Provide setup instructions for local development.
+
+---
+
+# 25. IMPLEMENTATION EXECUTION RULES
+
+Follow these rules strictly.
+
+1. Inspect the existing repository before making changes.
+2. Preserve existing working functionality if this is an existing codebase.
+3. Create an implementation plan.
+4. Establish project structure.
+5. Build database schema and migrations.
+6. Implement authentication and multi-tenancy.
+7. Implement Instagram integration.
+8. Implement webhooks.
+9. Implement messaging services.
+10. Build the inbox UI.
+11. Implement AI.
+12. Implement CRM and teams.
+13. Implement billing and analytics.
+14. Add tests.
+15. Verify build and production readiness.
+
+Do not stop after creating the project scaffold.
+
+Do not generate only placeholder pages.
+
+Do not hardcode fake conversations in production screens.
+
+Use seeded development data only when explicitly in development mode.
+
+All buttons must have working actions.
+
+All forms must validate and persist data.
+
+All tables must use real API data.
+
+All navigation items must lead to implemented pages or clearly labeled features under development.
+
+Do not use unofficial Instagram integration methods.
+
+Do not bypass Meta messaging restrictions.
+
+If Meta API credentials are unavailable, implement a proper adapter interface and test adapter, and make the connection state clearly visible.
+
+Do not invent successful API responses.
+
+Do not mark an integration as connected until the real OAuth process succeeds.
+
+Do not mark messages as sent until Meta accepts them.
+
+Do not disable security checks just to make the demo work.
+
+---
+
+# 26. DEFINITION OF DONE
+
+The application is considered MVP-complete only when:
+
+- A user can register and log in.
+- A user can create an organization.
+- Organization data is isolated.
+- A user can invite agents.
+- An authorized user can connect an Instagram professional account through OAuth.
+- Tokens are securely stored.
+- Webhooks are verified and processed.
+- Incoming Instagram messages appear in the inbox.
+- Agents can send permitted replies.
+- Messages are persisted.
+- Real-time updates work.
+- AI suggestions work.
+- AI automatic responses work within permitted policies.
+- Human handoff works.
+- Contacts are created and managed.
+- Conversations can be assigned.
+- Multiple Instagram accounts can be managed.
+- Agency account access is isolated.
+- Usage is tracked.
+- Subscription architecture is operational.
+- Security and tenant-isolation tests pass.
+- Production deployment instructions are complete.
+
+---
+
+# FINAL INSTRUCTION
+
+Build this as a real commercial SaaS product, not a tutorial project.
+
+Prioritize correctness, maintainability, security, performance and a polished compact user interface.
+
+The application should look like a premium, minimal, modern customer-support CRM.
+
+Use a light theme only.
+
+Use compact typography.
+
+Avoid oversized fonts, unnecessary whitespace, heavy animations and excessive dependencies.
+
+Start by inspecting the repository and preparing the implementation plan.
+
+Then immediately begin implementation.
+
+Do not ask unnecessary questions. Make sensible engineering decisions, document assumptions, and continue building until the requested MVP is implemented and tested.
